@@ -52,6 +52,7 @@ with open(CAMERA_PARAMETERS_INPUT_FILE) as f:
     mtx = loadeddict.get('camera_matrix')
     dist = loadeddict.get('dist_coeff')
     mtx = np.array(mtx)
+    mtx_inv = np.linalg.inv(mtx)
     dist = np.array(dist)
 
 images = calib_imgs_path.glob('*.jpg')
@@ -73,7 +74,7 @@ for fname in images:
             pts_l_norm = cv2.undistortPoints(dst_pts, cameraMatrix=mtx, distCoeffs=dist, P=mtx)
             H, mask = cv2.findHomography(src_pts,pts_l_norm, cv2.RANSAC, 5.0)
             if H is not None:
-                (R, T) = util.camera_pose_from_homography(mtx, H)
+                (R, T) = util.camera_pose_from_homography(mtx_inv, H)
                 rvec_, _ = cv2.Rodrigues(R.T)
                 r = rot.from_rotvec(rvec_.T).as_euler('xyz', degrees=True)
                 cv2.putText(img, 'Rotation(Euler angles): X: {:0.2f} Y: {:0.2f} Z: {:0.2f}'.format(r[0][0], r[0][1], r[0][2]), (20, int(frame_height) - 20), cv2.FONT_HERSHEY_SIMPLEX, .5, (255, 255, 255))
@@ -84,7 +85,7 @@ for fname in images:
                 img = cv2.polylines(img, [np.int32(dst)], True, (100, 230, 240), 3, cv2.LINE_AA)
                 # Project 3D axes points to the image.
                 img_axes_pts, jac = cv2.projectPoints(axes, rvec_, T, mtx, dist)
-                img = util.draw_axes(img, img_axes_pts)
+                img = util.draw_axes(img, np.int32(img_axes_pts))
                 if RESULT_PATH is not None:
                     name = RESULT_PATH + os.path.basename(fname)
                     cv2.imwrite(name, img)

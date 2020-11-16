@@ -7,18 +7,17 @@ def draw_axes(img, img_axes_pts):
     img = cv2.line(img, tuple(img_axes_pts[0].ravel()), tuple(img_axes_pts[3].ravel()), (255, 0, 0), 2)
     return img
 
-def camera_pose_from_homography(K, H):
+def camera_pose_from_homography(Kinv, H):
     '''Calculate camera pose from Homography.
 
     Args:
-       K: intrinsic camera matrix
+       Kinv: inverse intrinsic camera matrix
        H: homography matrix
     Returns:
        R: rotation matrix
        T: translation vector
     '''
     H = np.transpose(H)
-    Kinv = np.linalg.inv(K)
     # the scale factor
     l = 1 / np.linalg.norm(np.dot(Kinv, H[0]))
     r1 = l * np.dot(Kinv, H[0])
