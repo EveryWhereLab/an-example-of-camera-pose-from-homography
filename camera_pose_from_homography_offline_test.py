@@ -6,10 +6,7 @@ Author: Zong-Chao Cheng
 
 import numpy as np
 import cv2
-from matplotlib import pyplot as plt
-import math
 from scipy.spatial.transform import Rotation as rot
-import glob
 import yaml
 from pathlib import Path
 import os
